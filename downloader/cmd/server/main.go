@@ -20,10 +20,8 @@ import (
 )
 
 func main() {
-	// Load configuration
 	cfg := config.Load()
 
-	// Connect to PostgreSQL
 	db, err := sql.Open("postgres", cfg.DBConn)
 	if err != nil {
 		log.Fatal("failed to connect to db:", err)
@@ -32,19 +30,16 @@ func main() {
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(5)
 
-	// Initialize repository, HTTP client, usecase, handler
 	repo := repository.NewPostgresRepo(db)
 	httpDownloader := httpAdapter.NewHTTPFileDownloader(30 * time.Second) // per-file timeout
 	uc := usecase.NewDownloaderUsecase(repo, httpDownloader)
 	handler := httpAdapter.NewHandler(uc)
 
-	// Set up routes (Go 1.22+ path parameters)
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /downloads", handler.CreateDownload)
 	mux.HandleFunc("GET /downloads/{id}", handler.GetDownloadStatus)
 	mux.HandleFunc("GET /downloads/{id}/files/{file_id}", handler.GetFile)
 
-	// Wrap with middleware (order matters: panic recovery first, then request ID, then logging)
 	var rootHandler http.Handler = mux
 	rootHandler = httpAdapter.PanicRecoveryMiddleware(rootHandler)
 	rootHandler = httpAdapter.RequestIDMiddleware(rootHandler)
@@ -54,7 +49,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	// HTTP server
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      rootHandler,
@@ -62,13 +56,11 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	// Graceful shutdown: listen for OS signals
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	// Run server in a goroutine
 	g.Go(func() error {
 		log.Printf("starting server on %s", cfg.ServerPort)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -77,7 +69,6 @@ func main() {
 		return nil
 	})
 
-	// Wait for signal, then shut down gracefully within 60 seconds
 	g.Go(func() error {
 		<-ctx.Done()
 		log.Println("shutting down gracefully, waiting up to 60 seconds")

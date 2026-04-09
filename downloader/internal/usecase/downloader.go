@@ -20,9 +20,7 @@ func NewDownloaderUsecase(repo domain.Repository, httpDownloader domain.HTTPDown
 	}
 }
 
-// CreateAsync creates a download request and starts async downloads for all URLs
 func (uc *DownloaderUsecase) CreateAsync(ctx context.Context, urls []string, timeout time.Duration) (int64, error) {
-	// Create the download request
 	req := &domain.DownloadRequest{
 		Timeout:   timeout,
 		Status:    domain.StatusProcess,
@@ -35,7 +33,6 @@ func (uc *DownloaderUsecase) CreateAsync(ctx context.Context, urls []string, tim
 		return 0, err
 	}
 
-	// Create file records for each URL
 	fileIDs := make([]int64, len(urls))
 	for i, url := range urls {
 		file := &domain.File{
@@ -49,13 +46,11 @@ func (uc *DownloaderUsecase) CreateAsync(ctx context.Context, urls []string, tim
 		fileIDs[i] = fileID
 	}
 
-	// Start async downloads in background
 	go uc.downloadAsync(context.Background(), id, urls, fileIDs, timeout)
 
 	return id, nil
 }
 
-// downloadAsync performs the actual downloads concurrently
 func (uc *DownloaderUsecase) downloadAsync(ctx context.Context, requestID int64, urls []string, fileIDs []int64, timeout time.Duration) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -63,7 +58,7 @@ func (uc *DownloaderUsecase) downloadAsync(ctx context.Context, requestID int64,
 	g, ctx := errgroup.WithContext(ctx)
 
 	for i, url := range urls {
-		i, url := i, url // Capture loop variables
+		i, url := i, url
 		g.Go(func() error {
 			data, err := uc.httpDownloader.Download(ctx, url)
 
@@ -73,19 +68,15 @@ func (uc *DownloaderUsecase) downloadAsync(ctx context.Context, requestID int64,
 				errCode = &code
 			}
 
-			// Update the file record with content/error
 			return uc.repo.UpdateFileAfterDownload(ctx, fileIDs[i], data, errCode)
 		})
 	}
 
-	// Wait for all downloads to complete
-	_ = g.Wait() // Ignore error, already recorded in DB
+	_ = g.Wait()
 
-	// Update request status to DONE
 	_ = uc.repo.UpdateDownloadRequestStatus(context.Background(), requestID, domain.StatusDone)
 }
 
-// GetDownloadStatus returns the download request and file info
 func (uc *DownloaderUsecase) GetDownloadStatus(ctx context.Context, id int64) (*domain.DownloadRequest, []*domain.FileInfo, error) {
 	req, files, err := uc.repo.GetDownloadRequest(ctx, id)
 	if err != nil {
@@ -104,7 +95,6 @@ func (uc *DownloaderUsecase) GetDownloadStatus(ctx context.Context, id int64) (*
 	return req, infos, nil
 }
 
-// GetFile retrieves the content of a downloaded file
 func (uc *DownloaderUsecase) GetFile(ctx context.Context, fileID int64) ([]byte, error) {
 	return uc.repo.GetFileContent(ctx, fileID)
 }

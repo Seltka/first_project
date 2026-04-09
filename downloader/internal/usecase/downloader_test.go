@@ -9,7 +9,6 @@ import (
 	"github.com/tavanovyt/first_project/downloader/internal/usecase"
 )
 
-// MockRepository implements domain.Repository for testing
 type MockRepository struct {
 	createDownloadRequestFunc   func(ctx context.Context, req *domain.DownloadRequest) (int64, error)
 	createFileFunc              func(ctx context.Context, file *domain.File) (int64, error)
@@ -38,7 +37,6 @@ func (m *MockRepository) UpdateDownloadRequestStatus(ctx context.Context, id int
 	return nil
 }
 
-// MockHTTPDownloader implements domain.HTTPDownloader
 type MockHTTPDownloader struct {
 	downloadFunc func(ctx context.Context, url string) ([]byte, error)
 }
@@ -48,7 +46,6 @@ func (m *MockHTTPDownloader) Download(ctx context.Context, url string) ([]byte, 
 }
 
 func TestCreateAsync(t *testing.T) {
-	// Setup mocks
 	repo := &MockRepository{
 		createDownloadRequestFunc: func(ctx context.Context, req *domain.DownloadRequest) (int64, error) {
 			return 123, nil

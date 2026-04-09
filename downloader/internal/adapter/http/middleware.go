@@ -13,7 +13,6 @@ type contextKey string
 
 const RequestIDKey contextKey = "requestID"
 
-// Adds a request ID to the context and response header.
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rid := r.Header.Get("X-Request-ID")
@@ -26,7 +25,6 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// Recovers from panics and returns 500 instead of crashing the server.
 func PanicRecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -39,7 +37,6 @@ func PanicRecoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// Logs each request method, path, and duration.
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

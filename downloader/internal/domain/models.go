@@ -32,9 +32,9 @@ type File struct {
 	ID        int64
 	RequestID int64
 	URL       string
-	FileID    *int64 // filled after successful download
+	FileID    *int64
 	ErrorCode *FileErrorCode
-	Content   []byte // only used when storing/retrieving
+	Content   []byte
 }
 
 type FileInfo struct {
@@ -43,7 +43,6 @@ type FileInfo struct {
 	Error  *FileErrorCode
 }
 
-// Repository interface (abstract storage)
 type Repository interface {
 	CreateDownloadRequest(ctx context.Context, req *DownloadRequest) (int64, error)
 	UpdateDownloadRequestStatus(ctx context.Context, id int64, status DownloadStatus) error
@@ -53,7 +52,6 @@ type Repository interface {
 	UpdateFileAfterDownload(ctx context.Context, fileID int64, content []byte, errCode *FileErrorCode) error
 }
 
-// Downloader interface (external HTTP client)
 type HTTPDownloader interface {
 	Download(ctx context.Context, url string) ([]byte, error)
 }

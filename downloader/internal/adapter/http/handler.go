@@ -19,19 +19,16 @@ func NewHandler(uc *usecase.DownloaderUsecase) *Handler {
 	return &Handler{uc: uc}
 }
 
-// Request body for POST /downloads
 type createReq struct {
 	Files   []struct{ URL string } `json:"files"`
 	Timeout string                 `json:"timeout"`
 }
 
-// Response for POST /downloads
 type createResp struct {
 	ID     int64  `json:"id"`
 	Status string `json:"status"`
 }
 
-// Response for GET /downloads/{id}
 type getStatusResp struct {
 	ID     int64          `json:"id"`
 	Status string         `json:"status"`
@@ -44,7 +41,6 @@ type fileInfoResp struct {
 	Error  *struct{ Code string } `json:"error,omitempty"`
 }
 
-// POST /downloads
 func (h *Handler) CreateDownload(w http.ResponseWriter, r *http.Request) {
 	var req createReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -83,7 +79,6 @@ func (h *Handler) CreateDownload(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// GET /downloads/{id}
 func (h *Handler) GetDownloadStatus(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -116,7 +111,6 @@ func (h *Handler) GetDownloadStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// GET /downloads/{id}/files/{file_id}
 func (h *Handler) GetFile(w http.ResponseWriter, r *http.Request) {
 	fileIDStr := r.PathValue("file_id")
 	fileID, err := strconv.ParseInt(fileIDStr, 10, 64)
