@@ -18,7 +18,6 @@ func NewHTTPFileDownloader(timeout time.Duration) *HTTPFileDownloader {
 }
 
 func (d *HTTPFileDownloader) Download(ctx context.Context, url string) ([]byte, error) {
-	// Create request with context
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -30,7 +29,6 @@ func (d *HTTPFileDownloader) Download(ctx context.Context, url string) ([]byte, 
 	}
 	defer resp.Body.Close()
 
-	// Read all bytes (for small files only; for large files you'd stream to disk)
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

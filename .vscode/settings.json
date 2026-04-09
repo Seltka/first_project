@@ -1,0 +1,10 @@
+{
+  "sql.linter.executablePath": "",
+  "mssql.enabled": false,
+  "[sql]": {
+    "editor.defaultFormatter": null
+  },
+  "files.associations": {
+    "migrations/*.sql": "sql"
+  }
+}

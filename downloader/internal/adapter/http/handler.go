@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -68,6 +69,7 @@ func (h *Handler) CreateDownload(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.uc.CreateAsync(r.Context(), urls, timeout)
 	if err != nil {
+		log.Printf("CreateAsync error: %v", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

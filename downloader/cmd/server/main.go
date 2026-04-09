@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -49,9 +50,13 @@ func main() {
 	rootHandler = httpAdapter.RequestIDMiddleware(rootHandler)
 	rootHandler = httpAdapter.LoggingMiddleware(rootHandler)
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	// HTTP server
 	srv := &http.Server{
-		Addr:         cfg.ServerPort,
+		Addr:         ":" + port,
 		Handler:      rootHandler,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
